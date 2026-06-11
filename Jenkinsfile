@@ -4,12 +4,24 @@ pipeline {
     environment {
         DEPLOY_BRANCH = 'deploy'
         SOURCE_BRANCH = 'main'
+        
+        NODE_VERSION = '24.x'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        stage('Setup Node.js') {
+            steps {
+                script {
+                    def nodeVersion = "${NODE_VERSION}"
+                    sh "curl -sL https://deb.nodesource.com/setup_${nodeVersion} | sudo bash -"
+                    sh 'sudo apt-get install -y nodejs'
+                    sh 'node -v'
+                }
             }
         }
 
