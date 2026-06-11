@@ -31,8 +31,8 @@ pipeline {
                     def workspace = pwd()
                     def outDir = "${workspace}/out"
 
-                    sh """
-                        git config user.email "jenkins@curriculum-fv"
+                    sh '''
+                        git config user.email "jenkins@fhome"
                         git config user.name "Jenkins CI"
 
                         git fetch origin ${DEPLOY_BRANCH} || true
@@ -58,7 +58,7 @@ pipeline {
                         fi
 
                         git checkout ${SOURCE_BRANCH}
-                    """
+                    '''
                 }
             }
         }
