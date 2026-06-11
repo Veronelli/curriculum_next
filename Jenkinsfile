@@ -1,89 +1,128 @@
 pipeline {
-    agent any
+agent any
 
-    environment {
-        DEPLOY_BRANCH = 'deploy'
-        SOURCE_BRANCH = 'main'
-        
-        NODE_VERSION = '24.x'
+```
+environment {
+    DEPLOY_BRANCH = 'deploy'
+    SOURCE_BRANCH = 'main'
+    NODE_VERSION = '24.x'
+}
+
+stages {
+    stage('Checkout') {
+        steps {
+            checkout scm
+        }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        stage('Setup Node.js') {
-            steps {
-                script {
-                    def nodeVersion = "${NODE_VERSION}"
-                    sh """
-                        curl -sL https://deb.nodesource.com/setup_\${nodeVersion} | bash -
-                        apt-get update
-                        DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
-                        node -v
-                    """
-                }
-            }
-        }
-
-        stage('Install dependencies') {
-            steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Build & Export') {
-            steps {
-                sh 'npm run build'
-            }
-        }
-
-        stage('Deploy to branch') {
-            steps {
-                script {
-                    def workspace = pwd()
-                    def outDir = "${workspace}/out"
-
-                    sh """
-                        git config user.email "jenkins@fhome"
-                        git config user.name "Jenkins CI"
-
-                        git fetch origin ${DEPLOY_BRANCH} || true
-
-                        if git rev-parse --verify origin/${DEPLOY_BRANCH} > /dev/null 2>&1; then
-                            git checkout ${DEPLOY_BRANCH}
-                        else
-                            git checkout --orphan ${DEPLOY_BRANCH}
-                        fi
-
-                        git rm -r --ignore-unmatch . || true
-
-                        cp -r ${outDir}/. .
-
-                        git add .
-
-                        if git diff --cached --quiet; then
-                            echo "No changes to deploy"
-                        else
-                            git commit -m "Deploy \$(date '+%Y-%m-%d %H:%M:%S')"
-                            git push origin ${DEPLOY_BRANCH}
-                        fi
-
-                        git checkout ${SOURCE_BRANCH}
-                    """
-                }
+    stage('Setup Node.js') {
+        steps {
+            script {
+                sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash -"
+                sh 'apt-get update'
+                sh 'apt-get install -y nodejs'
+                sh 'node -v'
+                sh 'npm -v'
             }
         }
     }
 
-    post {
-        failure {
-            echo 'Pipeline failed'
-        }
-        success {
-            echo 'Pipeline completed successfully'
+    stage('Install dependencies') {
+        steps {
+            sh 'npm ci'
         }
     }
+
+    stage('Build') {
+        steps {
+            sh 'npm run build'
+        }
+    }
+
+    stage('Verify Export') {
+        steps {
+            sh '''
+                echo "Workspace:"
+                pwd
+
+                echo "Root files:"
+                ls -la
+
+                if [ ! -d "out" ]; then
+                    echo "ERROR: Next.js export folder 'out' was not generated."
+                    echo "Did you configure output: 'export' in next.config.ts?"
+                    exit 1
+                fi
+
+                echo "Export directory:"
+                ls -la out
+            '''
+        }
+    }
+
+    stage('Deploy to branch') {
+        steps {
+            sh '''
+                set -e
+
+                git config user.email "jenkins@fhome"
+                git config user.name "Jenkins CI"
+
+                DEPLOY_DIR=$(mktemp -d)
+
+                cp -R out/. "$DEPLOY_DIR"
+
+                git fetch origin ${DEPLOY_BRANCH} || true
+
+                if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                    git checkout -B ${DEPLOY_BRANCH} origin/${DEPLOY_BRANCH}
+                else
+                    git checkout --orphan ${DEPLOY_BRANCH}
+                fi
+
+                find . \
+                    -mindepth 1 \
+                    -maxdepth 1 \
+                    ! -name '.git' \
+                    -exec rm -rf {} +
+
+                cp -R "$DEPLOY_DIR"/. .
+
+                git add .
+
+                if git diff --cached --quiet; then
+                    echo "No changes to deploy"
+                else
+                    git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+
+                    if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                        git push origin ${DEPLOY_BRANCH}
+                    else
+                        git push -u origin ${DEPLOY_BRANCH}
+                    fi
+                fi
+
+                git checkout ${SOURCE_BRANCH}
+
+                rm -rf "$DEPLOY_DIR"
+            '''
+        }
+    }
+}
+
+post {
+    success {
+        echo 'Pipeline completed successfully'
+    }
+
+    failure {
+        echo 'Pipeline failed'
+    }
+
+    always {
+        cleanWs()
+    }
+}
+```
+
 }
