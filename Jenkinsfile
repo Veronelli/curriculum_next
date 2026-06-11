@@ -18,9 +18,12 @@ pipeline {
             steps {
                 script {
                     def nodeVersion = "${NODE_VERSION}"
-                    sh "curl -sL https://deb.nodesource.com/setup_${nodeVersion} | bash -"
-                    sh 'apt-get install -y nodejs'
-                    sh 'node -v'
+                    sh """
+                        curl -sL https://deb.nodesource.com/setup_\${nodeVersion} | bash -
+                        apt-get update
+                        DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+                        node -v
+                    """
                 }
             }
         }
@@ -43,7 +46,7 @@ pipeline {
                     def workspace = pwd()
                     def outDir = "${workspace}/out"
 
-                    sh '''
+                    sh """
                         git config user.email "jenkins@fhome"
                         git config user.name "Jenkins CI"
 
@@ -55,22 +58,21 @@ pipeline {
                             git checkout --orphan ${DEPLOY_BRANCH}
                         fi
 
-                        git rm -rf . || true
+                        git rm -r --ignore-unmatch . || true
 
-                        cp -r ${outDir}/* .
-                        cp -r ${outDir}/.* . || true
+                        cp -r ${outDir}/. .
 
                         git add .
 
                         if git diff --cached --quiet; then
                             echo "No changes to deploy"
                         else
-                            git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+                            git commit -m "Deploy \$(date '+%Y-%m-%d %H:%M:%S')"
                             git push origin ${DEPLOY_BRANCH}
                         fi
 
                         git checkout ${SOURCE_BRANCH}
-                    '''
+                    """
                 }
             }
         }
