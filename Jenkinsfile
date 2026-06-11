@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     DEPLOY_BRANCH = 'deploy'
     SOURCE_BRANCH = 'main'
@@ -123,6 +122,5 @@ post {
         cleanWs()
     }
 }
-```
 
 }
