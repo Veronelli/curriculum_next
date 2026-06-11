@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    environment {
+        DEPLOY_BRANCH = 'deploy'
+        SOURCE_BRANCH = 'main'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Build & Export') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+        stage('Deploy to branch') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    def outDir = "${workspace}/out"
+
+                    sh """
+                        git config user.email "jenkins@curriculum-fv"
+                        git config user.name "Jenkins CI"
+
+                        git fetch origin ${DEPLOY_BRANCH} || true
+
+                        if git rev-parse --verify origin/${DEPLOY_BRANCH} > /dev/null 2>&1; then
+                            git checkout ${DEPLOY_BRANCH}
+                        else
+                            git checkout --orphan ${DEPLOY_BRANCH}
+                        fi
+
+                        git rm -rf . || true
+
+                        cp -r ${outDir}/* .
+                        cp -r ${outDir}/.* . || true
+
+                        git add .
+
+                        if git diff --cached --quiet; then
+                            echo "No changes to deploy"
+                        else
+                            git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+                            git push origin ${DEPLOY_BRANCH}
+                        fi
+
+                        git checkout ${SOURCE_BRANCH}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline failed'
+        }
+        success {
+            echo 'Pipeline completed successfully'
+        }
+    }
+}
