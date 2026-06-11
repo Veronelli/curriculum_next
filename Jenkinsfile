@@ -4,7 +4,7 @@ agent any
 environment {
     DEPLOY_BRANCH = 'deploy'
     SOURCE_BRANCH = 'main'
-    NODE_VERSION = '24.x'
+    NODE_VERSION = '24.5.0'
 }
 
 stages {
