@@ -2,12 +2,13 @@
 
 import { motion } from "motion/react"
 import { TechMarquee } from "./tech-marquee"
+import { BASE_PATH } from "@/lib/constants"
 
 const data = {
   name: "Facundo Veronelli",
   title: "Full Stack Developer",
   location: "Buenos Aires, Argentina",
-  email: "facundo.veronelli@gmail.com",
+  email: "facu2000veronelli@icloud.com",
   summary: "Profesional con experiencia en IT y estudios técnicos en computación, especializado en desarrollo de software. Actualmente cursando la carrera de Análisis de Sistemas.",
 }
 
@@ -57,8 +58,15 @@ export function Principal() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.6 }}
-        className="mt-8 flex gap-6 text-sm"
+        className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm"
       >
+        <a
+          href={"mailto:" + data.email}
+          className="underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
+          style={{ color: "var(--color-neon)" }}
+        >
+          {data.email}
+        </a>
         <a
           href="https://github.com/Veronelli"
           target="_blank"
@@ -76,6 +84,22 @@ export function Principal() {
           style={{ color: "var(--color-neon)" }}
         >
           LinkedIn
+        </a>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.75 }}
+        className="mt-8"
+      >
+        <a
+          href={`${BASE_PATH}/curriculum.pdf`}
+          download
+          className="inline-block border border-dotted px-6 py-3 text-sm font-medium uppercase tracking-widest transition-all hover:bg-white/10"
+          style={{ borderColor: "var(--color-neon)", color: "var(--color-neon)" }}
+        >
+          Descargar CV
         </a>
       </motion.div>
 
