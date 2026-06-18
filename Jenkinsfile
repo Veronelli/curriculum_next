@@ -19,7 +19,7 @@ stages {
             script {
                 sh "curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash -"
                 sh 'apt-get update'
-                sh 'apt-get install -y nodejs'
+                sh 'apt-get install -y nodejs npm'
                 sh 'node -v'
                 sh 'npm -v'
             }
