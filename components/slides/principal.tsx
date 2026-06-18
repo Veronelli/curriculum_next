@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react"
 import { TechMarquee } from "./tech-marquee"
+import { LinkPreview } from "@/components/link-preview"
 import { BASE_PATH } from "@/lib/constants"
 
 const data = {
@@ -58,7 +59,7 @@ export function Principal() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.6 }}
-        className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm"
+        className="mt-8 flex flex-wrap items-center gap-4 text-sm"
       >
         <a
           href={"mailto:" + data.email}
@@ -67,24 +68,8 @@ export function Principal() {
         >
           {data.email}
         </a>
-        <a
-          href="https://github.com/Veronelli"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-neon)" }}
-        >
-          GitHub
-        </a>
-        <a
-          href="https://linkedin.com/in/facundoveronelli"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-neon)" }}
-        >
-          LinkedIn
-        </a>
+        <LinkPreview url="https://github.com/Veronelli" compact />
+        <LinkPreview url="https://linkedin.com/in/facundoveronelli" compact />
       </motion.div>
 
       <motion.div

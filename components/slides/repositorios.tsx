@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "motion/react"
+import { LinkPreview } from "@/components/link-preview"
 
 export function Repositorios() {
   return (
@@ -18,19 +19,12 @@ export function Repositorios() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.2 }}
+        className="max-w-md"
       >
         <p className="mb-4 text-lg text-white/60">
           Vinculación con GitHub pendiente. Próximamente se listarán los repositorios.
         </p>
-        <a
-          href="https://github.com/Veronelli"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-neon)" }}
-        >
-          github.com/Veronelli
-        </a>
+        <LinkPreview url="https://github.com/Veronelli" />
       </motion.div>
     </div>
   )
