@@ -61,50 +61,66 @@ stages {
 
     stage('Deploy to branch') {
         steps {
-            sh '''
-                set -e
+            script {
+                def withGitCredentials = { Closure body ->
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.JENKINS_CREDENTIAL_ID, usernameVariable: 'GIT_CREDS_USR', passwordVariable: 'GIT_CREDS_PSW']]) {
+                        sh '''
+                            git remote set-url origin $(git remote get-url origin | sed "s|://|://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@|")
+                        '''
+                        body()
+                        sh '''
+                            git remote set-url origin $(git remote get-url origin | sed "s|://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@|://|")
+                        '''
+                    }
+                }
 
-                git config user.email "jenkins@fhome"
-                git config user.name "Jenkins CI"
+                withGitCredentials {
+                    sh '''
+                        set -e
 
-                DEPLOY_DIR=$(mktemp -d)
+                        git config user.email "jenkins@fhome"
+                        git config user.name "Jenkins CI"
 
-                cp -R out/. "$DEPLOY_DIR"
+                        DEPLOY_DIR=$(mktemp -d)
 
-                git fetch origin ${DEPLOY_BRANCH} || true
+                        cp -R out/. "$DEPLOY_DIR"
 
-                if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
-                    git checkout -B ${DEPLOY_BRANCH} origin/${DEPLOY_BRANCH}
-                else
-                    git checkout --orphan ${DEPLOY_BRANCH}
-                fi
+                        git fetch origin ${DEPLOY_BRANCH} || true
 
-                find . \
-                    -mindepth 1 \
-                    -maxdepth 1 \
-                    ! -name '.git' \
-                    -exec rm -rf {} +
+                        if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                            git checkout -B ${DEPLOY_BRANCH} origin/${DEPLOY_BRANCH}
+                        else
+                            git checkout --orphan ${DEPLOY_BRANCH}
+                        fi
 
-                cp -R "$DEPLOY_DIR"/. .
+                        find . \
+                            -mindepth 1 \
+                            -maxdepth 1 \
+                            ! -name '.git' \
+                            -exec rm -rf {} +
 
-                git add .
+                        cp -R "$DEPLOY_DIR"/. .
 
-                if git diff --cached --quiet; then
-                    echo "No changes to deploy"
-                else
-                    git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+                        git add .
 
-                    if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
-                        git push origin ${DEPLOY_BRANCH}
-                    else
-                        git push -u origin ${DEPLOY_BRANCH}
-                    fi
-                fi
+                        if git diff --cached --quiet; then
+                            echo "No changes to deploy"
+                        else
+                            git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
 
-                git checkout ${SOURCE_BRANCH}
+                            if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                                git push origin ${DEPLOY_BRANCH}
+                            else
+                                git push -u origin ${DEPLOY_BRANCH}
+                            fi
+                        fi
 
-                rm -rf "$DEPLOY_DIR"
-            '''
+                        git checkout ${SOURCE_BRANCH}
+
+                        rm -rf "$DEPLOY_DIR"
+                    '''
+                }
+            }
         }
     }
 }
