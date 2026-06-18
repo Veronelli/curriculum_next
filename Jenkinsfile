@@ -59,70 +59,56 @@ stages {
         }
     }
 
-    stage('Deploy to branch') {
-        steps {
-            script {
-                def withGitCredentials = { Closure body ->
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: env.JENKINS_CREDENTIAL_ID, usernameVariable: 'GIT_CREDS_USR', passwordVariable: 'GIT_CREDS_PSW']]) {
-                        sh '''
-                            git remote set-url origin $(git remote get-url origin | sed "s|://|://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@|")
-                        '''
-                        body()
-                        sh '''
-                            git remote set-url origin $(git remote get-url origin | sed "s|://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@|://|")
-                        '''
-                    }
-                }
+stage('Deploy to branch') {
+    steps {
+        sshagent(credentials: ['79ead8d6-5028-4529-9e33-9d5055b67e8f']) {
+            sh '''
+                set -e
 
-                withGitCredentials {
-                    sh '''
-                        set -e
+                git config user.email "jenkins@fhome"
+                git config user.name "Jenkins CI"
 
-                        git config user.email "jenkins@fhome"
-                        git config user.name "Jenkins CI"
+                DEPLOY_DIR=$(mktemp -d)
 
-                        DEPLOY_DIR=$(mktemp -d)
+                cp -R out/. "$DEPLOY_DIR"
 
-                        cp -R out/. "$DEPLOY_DIR"
+                git fetch origin ${DEPLOY_BRANCH} || true
 
-                        git fetch origin ${DEPLOY_BRANCH} || true
+                if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                    git checkout -B ${DEPLOY_BRANCH} origin/${DEPLOY_BRANCH}
+                else
+                    git checkout --orphan ${DEPLOY_BRANCH}
+                fi
 
-                        if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
-                            git checkout -B ${DEPLOY_BRANCH} origin/${DEPLOY_BRANCH}
-                        else
-                            git checkout --orphan ${DEPLOY_BRANCH}
-                        fi
+                find . \
+                    -mindepth 1 \
+                    -maxdepth 1 \
+                    ! -name '.git' \
+                    -exec rm -rf {} +
 
-                        find . \
-                            -mindepth 1 \
-                            -maxdepth 1 \
-                            ! -name '.git' \
-                            -exec rm -rf {} +
+                cp -R "$DEPLOY_DIR"/. .
 
-                        cp -R "$DEPLOY_DIR"/. .
+                git add .
 
-                        git add .
+                if git diff --cached --quiet; then
+                    echo "No changes to deploy"
+                else
+                    git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
 
-                        if git diff --cached --quiet; then
-                            echo "No changes to deploy"
-                        else
-                            git commit -m "Deploy $(date '+%Y-%m-%d %H:%M:%S')"
+                    if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
+                        git push origin ${DEPLOY_BRANCH}
+                    else
+                        git push -u origin ${DEPLOY_BRANCH}
+                    fi
+                fi
 
-                            if git show-ref --verify --quiet refs/remotes/origin/${DEPLOY_BRANCH}; then
-                                git push origin ${DEPLOY_BRANCH}
-                            else
-                                git push -u origin ${DEPLOY_BRANCH}
-                            fi
-                        fi
+                git checkout ${SOURCE_BRANCH}
 
-                        git checkout ${SOURCE_BRANCH}
-
-                        rm -rf "$DEPLOY_DIR"
-                    '''
-                }
-            }
+                rm -rf "$DEPLOY_DIR"
+            '''
         }
     }
+}
 }
 
 post {
