@@ -24,13 +24,17 @@ const SIDEBAR_W = 224
 
 export function Slideshow() {
   const [active, setActive] = useState<SectionId>("principal")
-  const [menuOpen, setMenuOpen] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(true)
   const [curtainPhase, setCurtainPhase] = useState<"cover" | "reveal" | null>(null)
   const [pendingSection, setPendingSection] = useState<SectionId | null>(null)
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (mobile) setMenuOpen(false)
+    }
     check()
     window.addEventListener("resize", check)
     return () => window.removeEventListener("resize", check)
