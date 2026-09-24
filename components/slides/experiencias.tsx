@@ -4,16 +4,14 @@ import { motion } from "motion/react"
 
 const experiences = [
   {
-    company: "Grupo Simpli (SimpliMuv)",
-    role: "Full-Stack Developer",
-    period: "Jul 2022 - Actualidad",
-    desc: "Django, FastAPI, NuxtJS. Mantenimiento de servicios y frontend.",
-  },
-  {
-    company: "SimpliTEC",
-    role: "Full-Stack Developer",
-    period: "Abr 2022 - Jun 2022",
-    desc: "Vue.js, Svelte, Strapi como CMS.",
+    company: "Grupo Simpli",
+    role: "Desarrollador Full Stack SSR",
+    period: "Abr 2022 — Mar 2026",
+    desc: "Python, Django, FastAPI, Nuxt.js, React.js, Node.js y N8N. Desarrollo de DMS, microservicios y agentes de IA.",
+    links: [
+      { label: "DMS Harley-Davidson Argentina", href: "http://tienda.harley-davidson.com.ar/" },
+      { label: "Agente IA de servicios", href: "https://tr.ee/IpfC8JXMpC" },
+    ],
   },
   {
     company: "BeWise",
@@ -51,6 +49,22 @@ export function Experiencias() {
             </div>
             <p className="mt-0.5" style={{ color: "var(--color-neon)" }}>{exp.company}</p>
             <p className="mt-2 text-sm text-white/70">{exp.desc}</p>
+            {exp.links && (
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+                {exp.links.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
+                    style={{ color: "var(--color-neon)" }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
           </motion.div>
         ))}
       </div>

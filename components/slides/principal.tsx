@@ -7,10 +7,10 @@ import { BASE_PATH } from "@/lib/constants"
 
 const data = {
   name: "Facundo Veronelli",
-  title: "Full Stack Developer",
+  title: "Full Stack Developer | Técnico Superior Analista de Sistemas",
   location: "Buenos Aires, Argentina",
   email: "facu2000veronelli@icloud.com",
-  summary: "Profesional con experiencia en IT y estudios técnicos en computación, especializado en desarrollo de software. Actualmente cursando la carrera de Análisis de Sistemas.",
+  summary: "Analista de Sistemas y desarrollador full stack, con experiencia en backend, frontend, microservicios y agentes de IA. Actualmente curso el Diploma Ciclo de Consolidación de inglés B1 en CUI.",
 }
 
 export function Principal() {
@@ -69,7 +69,15 @@ export function Principal() {
           {data.email}
         </a>
         <LinkPreview url="https://github.com/Veronelli" compact />
-        <LinkPreview url="https://linkedin.com/in/facundoveronelli" compact />
+        <a
+          href="https://linkedin.com/in/facundoveronelli"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-dotted underline-offset-4 transition-opacity hover:opacity-70"
+          style={{ color: "var(--color-neon)" }}
+        >
+          LinkedIn
+        </a>
       </motion.div>
 
       <motion.div

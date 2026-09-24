@@ -24,9 +24,6 @@ export function LinkPreview({ url, compact = false, className = "" }: LinkPrevie
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
-    setError(false)
-    setData(null)
 
     fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`)
       .then((res) => res.json())

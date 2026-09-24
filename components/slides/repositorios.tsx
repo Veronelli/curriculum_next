@@ -22,9 +22,12 @@ export function Repositorios() {
         className="max-w-md"
       >
         <p className="mb-4 text-lg text-white/60">
-          Vinculación con GitHub pendiente. Próximamente se listarán los repositorios.
+          Repositorios personales y proyectos de la organización PUMACORE.
         </p>
-        <LinkPreview url="https://github.com/Veronelli" />
+        <div className="grid grid-cols-2 gap-3">
+          <LinkPreview url="https://github.com/Veronelli" />
+          <LinkPreview url="https://github.com/Puma-Core" />
+        </div>
       </motion.div>
     </div>
   )

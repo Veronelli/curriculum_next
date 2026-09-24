@@ -29,8 +29,28 @@ export function Proyectos() {
           className="max-w-2xl"
         >
           <p className="mb-8 text-lg leading-relaxed text-white/80">
-            Se está desarrollando la organización de proyectos productivos para escenarios reales.
+            PUMACORE desarrolla proyectos productivos para escenarios reales.
           </p>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <a
+              href="https://github.com/Puma-Core"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-dotted px-4 py-3 transition-colors hover:bg-white/10"
+              style={{ borderColor: "var(--color-neon)", color: "var(--color-neon)" }}
+            >
+              Organización en GitHub
+            </a>
+            <a
+              href="https://blogcore.pumacore.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-dotted px-4 py-3 transition-colors hover:bg-white/10"
+              style={{ borderColor: "var(--color-neon)", color: "var(--color-neon)" }}
+            >
+              BlogCore
+            </a>
+          </div>
         </motion.div>
       </div>
     </div>
